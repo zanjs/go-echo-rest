@@ -9,16 +9,16 @@ import (
 type (
 	User struct {
 		BaseModel
-		Username string `json:"username" gorm:"type:varchar(100);unique"`
-		Email    string `json:"email" gorm:"type:varchar(100);unique"`
-		Password string `json:"-"`
-		//Articles []Article `json:"articles"`
+		Username string    `json:"username" gorm:"type:varchar(100);unique"`
+		Email    string    `json:"email" gorm:"type:varchar(100);unique"`
+		Password string    `json:"-"`
+		Articles []Article `json:"articles"`
 	}
 )
 
 //CreateTable user
 func CreateTable() error {
-	gorm.MysqlConn().AutoMigrate(&User{}, &Article{})
+	gorm.MysqlConn().AutoMigrate(&User{}, &Article{}, &Product{}, &Wareroom{})
 
 	return nil
 }

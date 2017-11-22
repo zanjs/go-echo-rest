@@ -51,6 +51,20 @@ func main() {
 	v1.PUT("/articles/:id", controllers.UpdateArticle)
 	v1.DELETE("/articles/:id", controllers.DeleteArticle)
 
+	// Products
+	v1.GET("/products", controllers.AllProducts)
+	v1.POST("/products", controllers.CreateProduct)
+	v1.GET("/products/:id", controllers.ShowProduct)
+	v1.PUT("/products/:id", controllers.UpdateProduct)
+	v1.DELETE("/products/:id", controllers.DeleteProduct)
+
+	// Wareroom
+	v1.GET("/warerooms", controllers.AllWarerooms)
+	v1.POST("/warerooms", controllers.CreateWareroom)
+	v1.GET("/warerooms/:id", controllers.ShowWareroom)
+	v1.PUT("/warerooms/:id", controllers.UpdateWareroom)
+	v1.DELETE("/warerooms/:id", controllers.DeleteWareroom)
+
 	// Server
 	if err := e.Start(fmt.Sprintf("%s:%s", appConfig.HttpAddr, appConfig.HttpPort)); err != nil {
 		e.Logger.Fatal(err.Error())
