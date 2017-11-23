@@ -18,7 +18,7 @@ type (
 
 //CreateTable user
 func CreateTable() error {
-	gorm.MysqlConn().AutoMigrate(&User{}, &Article{}, &Product{}, &Wareroom{})
+	gorm.MysqlConn().AutoMigrate(&User{}, &Article{}, &Product{}, &Wareroom{}, &Record{})
 
 	return nil
 }

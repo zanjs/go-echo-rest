@@ -13,3 +13,14 @@ db:
 
 jwt:
   secret: mysecretkey
+
+
+qm: 
+  apiurl: 
+  ownercode: 
+  customerid: 
+  secret: 
+  appkey: 
+  signmethod: md5
+  format: xml
+  version: 2.0

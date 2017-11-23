@@ -12,6 +12,13 @@ type (
 		Title        string `json:"title" gorm:"type:varchar(100)"`
 		ExternalCode string `json:"external_code" gorm:"varchar(100)"`
 	}
+
+	QMProduct struct {
+		OwnerCode     string `json:"ownerCode"`
+		ItemCode      string `json:"itemCode"`
+		WarehouseCode string `json:"warehouseCode"`
+		InventoryType string `json:"inventoryType"`
+	}
 )
 
 func CreateProduct(m *Product) error {
@@ -80,7 +87,7 @@ func GetProducts() ([]Product, error) {
 	)
 
 	tx := gorm.MysqlConn().Begin()
-	if err = tx.Find(&products).Error; err != nil {
+	if err = tx.Order("id desc").Find(&products).Error; err != nil {
 		tx.Rollback()
 		return products, err
 	}

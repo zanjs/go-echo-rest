@@ -65,6 +65,9 @@ func main() {
 	v1.PUT("/warerooms/:id", controllers.UpdateWareroom)
 	v1.DELETE("/warerooms/:id", controllers.DeleteWareroom)
 
+	// qm
+	v1.GET("/records", controllers.AllProductWareroom)
+
 	// Server
 	if err := e.Start(fmt.Sprintf("%s:%s", appConfig.HttpAddr, appConfig.HttpPort)); err != nil {
 		e.Logger.Fatal(err.Error())
