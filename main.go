@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -13,6 +14,7 @@ var appConfig = config.Config.App
 var jwtConfig = config.Config.JWT
 
 func main() {
+
 	e := echo.New()
 
 	// Middleware
@@ -65,11 +67,24 @@ func main() {
 	v1.PUT("/warerooms/:id", controllers.UpdateWareroom)
 	v1.DELETE("/warerooms/:id", controllers.DeleteWareroom)
 
-	// qm
-	v1.GET("/records", controllers.AllProductWareroom)
-
+	// qm 库存销量更新
+	v1.GET("/records/jobs", controllers.AllProductWareroom)
+	v1.GET("/records", controllers.AllRecords)
+	v1.DELETE("/records/:id", controllers.DeleteRecord)
 	// Server
 	if err := e.Start(fmt.Sprintf("%s:%s", appConfig.HttpAddr, appConfig.HttpPort)); err != nil {
 		e.Logger.Fatal(err.Error())
 	}
+
+	ticker := time.NewTicker(time.Second * 1)
+	go func() {
+		for value := range ticker.C {
+			fmt.Println("ticked at %v", time.Now())
+			fmt.Println("value =", value)
+		}
+	}()
+	ch := make(chan int)
+	value := <-ch
+	fmt.Println("value =", value)
+
 }

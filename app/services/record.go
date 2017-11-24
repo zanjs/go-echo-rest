@@ -8,35 +8,14 @@ import (
 	"net/http"
 
 	"github.com/zanjs/go-echo-rest/app/models"
+	"github.com/zanjs/go-echo-rest/app/utils"
 )
 
 func QMHTTPPost(qmRequest models.QMRequest, record models.Record) {
 
 	fmt.Println("qmRequest:", qmRequest)
 	url := qmRequest.URL
-	// url := "http://192.168.1.184:1323/"
-	// url := "http://apix.jiuyescm.com/v1/qimen/receive?sign=41CAA7A7C573007A1D3C2DEBE34979B3&app_key=d8e8d76f-0917-435e-b1b3-8302282a8c4a&customerid=bkyy&format=xml&method=inventory.query&sign_method=md5&timestamp=2017-11-22 02:15:30&v=2.0"
-	// var qbody = qmRequest.Body
-	// var cType = "application/xml"
-	// var reqBody = bytes.NewBuffer([]byte(qbody))
-	// resp, err := http.NewRequest("POST", url, reqBody)
-	// resp.Header.Set("Content-Type", cType)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
 
-	// defer resp.Body.Close()
-	// body, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	// handle error
-	// }
-
-	// fmt.Println("string(body)")
-	// fmt.Println(string(body))
-
-	//登陆用户名
-
-	//json序列化
 	post := qmRequest.Body
 
 	fmt.Println("post:? ", post)
@@ -83,12 +62,46 @@ func QMHTTPPost(qmRequest models.QMRequest, record models.Record) {
 		fmt.Println("xml sp err :", err)
 	}
 
-	item := qmResponse.Items[0].Item
+	item := qmResponse.Items[0]
 
 	fmt.Println("xml Response Items :", item)
 	fmt.Println("库存 Items :", item.Quantity)
 
-	record.Quantity = item.Quantity
-
 	fmt.Println("记录商品信息 Items :", record)
+
+	oldRecord, oErr := models.GetRecordLast(record.WareroomID, record.ProductID)
+
+	if oErr != nil {
+		fmt.Println("查询旧数据：err:", oErr)
+	}
+
+	fmt.Println("查询旧数据：", oldRecord)
+
+	var initSales = 0
+	var quantity = item.Quantity
+	var oldQuantity = oldRecord.Quantity
+
+	if utils.IsEmpty(oldQuantity) {
+		fmt.Println("旧库存：", oldQuantity)
+	}
+
+	fmt.Println("旧库存：", oldQuantity)
+	fmt.Println("新库存：", quantity)
+
+	if oldQuantity == quantity {
+		return
+	}
+
+	if oldQuantity > quantity {
+		initSales = oldQuantity - quantity
+	}
+
+	newRecord := new(models.Record)
+
+	newRecord.Quantity = item.Quantity
+	newRecord.Sales = initSales
+	newRecord.ProductID = record.ProductID
+	newRecord.WareroomID = record.WareroomID
+
+	models.CreateRecord(newRecord)
 }

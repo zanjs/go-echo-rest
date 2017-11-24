@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo"
 	"github.com/zanjs/go-echo-rest/app/models"
@@ -26,36 +27,82 @@ func AllProductWareroom(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, err)
 	}
 
-	for _, v := range data.Warerooms {
-		var wareroom models.Wareroom
-		wareroom = v
-		numbering := wareroom.Numbering
-		fmt.Println(numbering)
+	go func() {
 
-		for _, v2 := range data.Products {
+		for _, v := range data.Warerooms {
+			var wareroom models.Wareroom
+			wareroom = v
+			numbering := wareroom.Numbering
+			fmt.Println(numbering)
 
-			var product models.Product
-			product = v2
-			fmt.Println(product)
+			for _, v2 := range data.Products {
 
-			var qmProduct models.QMProduct
-			qmProduct.ItemCode = product.ExternalCode
-			qmProduct.WarehouseCode = wareroom.Numbering
-			qmProduct.OwnerCode = "bkyy"
-			qmProduct.InventoryType = "ZP"
+				var product models.Product
+				product = v2
+				fmt.Println(product)
 
-			var qmRequest models.QMRequest
-			qmRequest = utils.Parameter("inventory.query", qmProduct)
+				var qmProduct models.QMProduct
+				qmProduct.ItemCode = product.ExternalCode
+				qmProduct.WarehouseCode = wareroom.Numbering
+				qmProduct.OwnerCode = "bkyy"
+				qmProduct.InventoryType = "ZP"
 
-			var record models.Record
-			record.ProductID = product.ID
-			record.WareroomID = wareroom.ID
+				var qmRequest models.QMRequest
+				qmRequest = utils.Parameter("inventory.query", qmProduct)
 
-			services.QMHTTPPost(qmRequest, record)
+				var record models.Record
+				record.ProductID = product.ID
+				record.WareroomID = wareroom.ID
+
+				services.QMHTTPPost(qmRequest, record)
+
+			}
 
 		}
 
-	}
+	}()
 
 	return c.JSON(http.StatusOK, data)
+}
+
+// AllRecords  get all records
+func AllRecords(c echo.Context) error {
+	var (
+		records []models.Record
+		err     error
+	)
+	records, err = models.GetRecords()
+	if err != nil {
+		return c.JSON(http.StatusForbidden, err)
+	}
+	return c.JSON(http.StatusOK, records)
+}
+
+// ShowRecord get one record
+func ShowRecord(c echo.Context) error {
+	var (
+		record models.Record
+		err    error
+	)
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	record, err = models.GetRecordById(id)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, err)
+	}
+	return c.JSON(http.StatusOK, record)
+}
+
+//DeleteRecord is record
+func DeleteRecord(c echo.Context) error {
+	var err error
+
+	// get the param id
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	m, err := models.GetRecordById(id)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, err)
+	}
+
+	err = m.DeleteRecord()
+	return c.JSON(http.StatusNoContent, err)
 }

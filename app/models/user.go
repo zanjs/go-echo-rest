@@ -12,7 +12,7 @@ type (
 		Username string    `json:"username" gorm:"type:varchar(100);unique"`
 		Email    string    `json:"email" gorm:"type:varchar(100);unique"`
 		Password string    `json:"-"`
-		Articles []Article `json:"articles"`
+		Articles []Article `json:"articles" gorm:"many2many:articles;"`
 	}
 )
 
@@ -25,12 +25,13 @@ func CreateTable() error {
 
 func GetUsers() ([]User, error) {
 	var (
-		users []User
-		err   error
+		users    []User
+		articles []Article
+		err      error
 	)
 
 	tx := gorm.MysqlConn().Begin()
-	if err = tx.Find(&users).Error; err != nil {
+	if err = tx.Find(&users).Related(&articles).Error; err != nil {
 		tx.Rollback()
 		return users, err
 	}
