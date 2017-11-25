@@ -30,6 +30,8 @@ func main() {
 	// Routes
 	e.GET("/", controllers.GetHome)
 
+	e.POST("/user/add", controllers.CreateUser)
+
 	v0 := e.Group("/v0")
 
 	v0.GET("/", controllers.CreateTable)

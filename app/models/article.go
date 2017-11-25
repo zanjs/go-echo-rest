@@ -1,14 +1,17 @@
 package models
 
 import (
-	"github.com/zanjs/go-echo-rest/db"
 	"time"
+
+	"github.com/nestgo/log"
+	"github.com/zanjs/go-echo-rest/db"
 )
 
 type (
+	// Article is
 	Article struct {
 		BaseModel
-		User    User   `json:"author"`
+		User    User   `gorm:"ForeignKey:UserId;AssociationForeignKey:Id" json:"user"`
 		UserID  int    `json:"user_id" gorm:"type:integer(11)"`
 		Title   string `json:"title" gorm:"type:varchar(100)"`
 		Content string `json:"content" gorm:"type:text"`
@@ -77,14 +80,26 @@ func GetArticleById(id uint64) (Article, error) {
 func GetArticles() ([]Article, error) {
 	var (
 		articles []Article
-		err      error
+
+		err error
 	)
 
 	tx := gorm.MysqlConn().Begin()
+
 	if err = tx.Find(&articles).Error; err != nil {
 		tx.Rollback()
 		return articles, err
 	}
+
+	// select articles.title,users.username from articles inner join users on articles.user_id = users.id
+
+	for key, article := range articles {
+		if err := tx.Model(&article).Related(&article.User).Error; err != nil {
+			log.Debugf("articles user related error: %v", err)
+		}
+		articles[key] = article
+	}
+
 	tx.Commit()
 
 	return articles, err

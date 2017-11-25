@@ -7,6 +7,7 @@ import (
 )
 
 type (
+	// User is
 	User struct {
 		BaseModel
 		Username string    `json:"username" gorm:"type:varchar(100);unique"`
@@ -26,15 +27,38 @@ func CreateTable() error {
 func GetUsers() ([]User, error) {
 	var (
 		users    []User
+		user     User
 		articles []Article
 		err      error
 	)
 
 	tx := gorm.MysqlConn().Begin()
-	if err = tx.Find(&users).Related(&articles).Error; err != nil {
+	if err = tx.Model(&user).Related(&articles).Find(&users).Error; err != nil {
 		tx.Rollback()
 		return users, err
 	}
+	// tx.Model(&users).Related(&articles)
+
+	tx.Commit()
+
+	return users, err
+}
+
+func GetUsersAnd() ([]User, error) {
+	var (
+		users []User
+		user  User
+		// articles []Article
+		err error
+	)
+
+	tx := gorm.MysqlConn().Begin()
+	if err = tx.Find(&users).Error; err != nil {
+		tx.Rollback()
+		return users, err
+	}
+	tx.Model(&user).Related(&user.Articles)
+
 	tx.Commit()
 
 	return users, err
