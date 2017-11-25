@@ -79,6 +79,26 @@ func GetArticleById(id uint64) (Article, error) {
 
 func GetArticles() ([]Article, error) {
 	var (
+		// user User
+		err error
+	)
+	user := User{}
+	articles := []Article{}
+
+	tx := gorm.MysqlConn().Begin()
+
+	if err = tx.Model(&user).Related(&articles).Error; err != nil {
+		tx.Rollback()
+		return articles, err
+	}
+
+	tx.Commit()
+
+	return articles, err
+}
+
+func GetArticlesFor() ([]Article, error) {
+	var (
 		articles []Article
 
 		err error
