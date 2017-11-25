@@ -26,14 +26,14 @@ func CreateTable() error {
 
 func GetUsers() ([]User, error) {
 	var (
-		users    []User
-		user     User
-		articles []Article
-		err      error
+		users []User
+		// user     User
+		// articles []Article
+		err error
 	)
 
 	tx := gorm.MysqlConn().Begin()
-	if err = tx.Model(&user).Related(&articles).Find(&users).Error; err != nil {
+	if err = tx.Preload("Articles").Find(&users).Error; err != nil {
 		tx.Rollback()
 		return users, err
 	}

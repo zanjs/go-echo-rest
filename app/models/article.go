@@ -79,15 +79,13 @@ func GetArticleById(id uint64) (Article, error) {
 
 func GetArticles() ([]Article, error) {
 	var (
-		// user User
-		err error
+		articles []Article
+		err      error
 	)
-	user := User{}
-	articles := []Article{}
 
 	tx := gorm.MysqlConn().Begin()
 
-	if err = tx.Model(&user).Related(&articles).Error; err != nil {
+	if err = tx.Preload("User").Find(&articles).Error; err != nil {
 		tx.Rollback()
 		return articles, err
 	}
