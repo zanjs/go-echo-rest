@@ -10,3 +10,9 @@ type BaseModel struct {
 	UpdatedAt time.Time  `json:"updated_at" gorm:"column:updated_at" sql:"DEFAULT:current_timestamp"`
 	DeletedAt *time.Time `json:"deleted_at" gorm:"column:deleted_at"`
 }
+
+type PageModel struct {
+	Offset int `json:"offset"`
+	Limit  int `json:"limit"`
+	Count  int `json:"count"`
+}

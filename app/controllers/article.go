@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -9,18 +10,51 @@ import (
 	"github.com/zanjs/go-echo-rest/app/models"
 )
 
-// get all articles
+// AllArticles is get all articles
 func AllArticles(c echo.Context) error {
 	var (
-		articles []models.Article
-		err      error
+		data models.ArticlePage
+		page models.PageModel
+		err  error
 	)
-	articles, err = models.GetArticles()
+
+	qps := c.QueryParams()
+
+	limitq := c.QueryParam("limit")
+	offsetq := c.QueryParam("offset")
+
+	limit, _ := strconv.Atoi(limitq)
+	offset, _ := strconv.Atoi(offsetq)
+	fmt.Println(qps)
+	fmt.Println(limit)
+	fmt.Println(offset)
+
+	if limit == 0 {
+		limit = 10
+	}
+
+	page.Limit = limit
+	page.Offset = offset
+
+	data, err = models.GetArticles(page)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, err)
 	}
-	return c.JSON(http.StatusOK, articles)
+	return c.JSON(http.StatusOK, data)
 }
+
+// get all articles
+// func AllArticles2(c echo.Context) error {
+// 	var (
+// 		articles []models.Article
+// 		err      error
+// 	)
+// 	articles, err = models.GetArticles()
+// 	if err != nil {
+// 		return c.JSON(http.StatusForbidden, err)
+// 	}
+// 	return c.JSON(http.StatusOK, articles)
+// }
 
 // get one article
 func ShowArticle(c echo.Context) error {

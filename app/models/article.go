@@ -8,6 +8,10 @@ import (
 )
 
 type (
+	ArticlePage struct {
+		Data []Article `json:"data"`
+		Page PageModel `json:"page"`
+	}
 	// Article is
 	Article struct {
 		BaseModel
@@ -77,22 +81,36 @@ func GetArticleById(id uint64) (Article, error) {
 	return article, err
 }
 
-func GetArticles() ([]Article, error) {
+func GetArticles(p PageModel) (ArticlePage, error) {
 	var (
 		articles []Article
+		pageData ArticlePage
 		err      error
 	)
 
+	pageData.Page.Limit = p.Limit
+	pageData.Page.Offset = p.Offset
+	// pageData.Page.Limit = 2
+	// pageData.Page.Offset = 2
+
 	tx := gorm.MysqlConn().Begin()
 
-	if err = tx.Preload("User").Find(&articles).Error; err != nil {
+	err = tx.Find(&articles).Count(&pageData.Page.Count).Error
+
+	if err != nil {
+		return pageData, err
+	}
+
+	if err = tx.Preload("User").Order("id desc").Offset(pageData.Page.Offset).Limit(pageData.Page.Limit).Find(&articles).Error; err != nil {
 		tx.Rollback()
-		return articles, err
+		return pageData, err
 	}
 
 	tx.Commit()
 
-	return articles, err
+	pageData.Data = articles
+
+	return pageData, err
 }
 
 func GetArticlesFor() ([]Article, error) {
