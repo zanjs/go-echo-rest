@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/nestgo/log"
@@ -81,7 +82,7 @@ func GetArticleById(id uint64) (Article, error) {
 	return article, err
 }
 
-func GetArticles(p PageModel) (ArticlePage, error) {
+func GetArticles(p QueryParams) (ArticlePage, error) {
 	var (
 		articles []Article
 		pageData ArticlePage
@@ -95,13 +96,22 @@ func GetArticles(p PageModel) (ArticlePage, error) {
 
 	tx := gorm.MysqlConn().Begin()
 
-	err = tx.Find(&articles).Count(&pageData.Page.Count).Error
+	// err = tx.Find(&articles).Count(&pageData.Page.Count).Error
 
-	if err != nil {
-		return pageData, err
+	// if err != nil {
+	// 	return pageData, err
+	// }
+	timeLayout := "2006-01-02 15:04:05"
+
+	if p.EndTime == "" {
+		p.EndTime = "2099-01-01 00:00:00"
+		fmt.Println("endTime 为空")
 	}
 
-	if err = tx.Preload("User").Order("id desc").Offset(pageData.Page.Offset).Limit(pageData.Page.Limit).Find(&articles).Error; err != nil {
+	startTime, _ := time.Parse(timeLayout, p.StartTime)
+	endTime, _ := time.Parse(timeLayout, p.EndTime)
+
+	if err = tx.Where("created_at BETWEEN ? AND ?", startTime, endTime).Preload("User").Order("id desc").Offset(pageData.Page.Offset).Limit(pageData.Page.Limit).Find(&articles).Count(&pageData.Page.Count).Error; err != nil {
 		tx.Rollback()
 		return pageData, err
 	}

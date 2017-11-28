@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -12,6 +11,11 @@ import (
 
 var appConfig = config.Config.App
 var jwtConfig = config.Config.JWT
+
+type disk struct {
+	read  string
+	write string
+}
 
 func main() {
 
@@ -27,10 +31,32 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 
+	var a = map[string]disk{
+		"xvda": disk{"5656418", "22438120"},
+		"xvdb": disk{"8493386", "1149266272"},
+	}
+	var b = map[string]disk{
+	// "xvda": disk{"11", "22"},
+	// "xvdb": disk{"33", "44"},
+	}
+
+	// for key, val := range a {
+	// 	b[key] = disk{val.read, val.write}
+	// 	// b[key].read = val.read
+	// 	// b[key].write = val.write
+	// }
+
+	for key, val := range a {
+		b[key] = val
+	}
+	fmt.Println(b)
+
 	// Routes
 	e.GET("/", controllers.GetHome)
 
 	e.POST("/user/add", controllers.CreateUser)
+
+	e.GET("/records/jobs", controllers.AllProductWareroom)
 
 	v0 := e.Group("/v0")
 
@@ -70,23 +96,13 @@ func main() {
 	v1.DELETE("/warerooms/:id", controllers.DeleteWareroom)
 
 	// qm 库存销量更新
-	v1.GET("/records/jobs", controllers.AllProductWareroom)
+
 	v1.GET("/records", controllers.AllRecords)
+	v1.GET("/records/excel", controllers.AllProductWareroomRecords)
 	v1.DELETE("/records/:id", controllers.DeleteRecord)
 	// Server
 	if err := e.Start(fmt.Sprintf("%s:%s", appConfig.HttpAddr, appConfig.HttpPort)); err != nil {
 		e.Logger.Fatal(err.Error())
 	}
-
-	ticker := time.NewTicker(time.Second * 1)
-	go func() {
-		for value := range ticker.C {
-			fmt.Println("ticked at %v", time.Now())
-			fmt.Println("value =", value)
-		}
-	}()
-	ch := make(chan int)
-	value := <-ch
-	fmt.Println("value =", value)
 
 }

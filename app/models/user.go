@@ -15,6 +15,11 @@ type (
 		Password string    `json:"-"`
 		Articles []Article `json:"articles"`
 	}
+
+	UserLogin struct {
+		Username string `json:"username" gorm:"type:varchar(100);unique"`
+		Password string `json:"password"`
+	}
 )
 
 //CreateTable user

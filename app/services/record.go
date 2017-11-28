@@ -62,6 +62,12 @@ func QMHTTPPost(qmRequest models.QMRequest, record models.Record) {
 		fmt.Println("xml sp err :", err)
 	}
 
+	code := qmResponse.Code
+
+	if code != "SUCCESS" {
+		return
+	}
+
 	item := qmResponse.Items[0]
 
 	fmt.Println("xml Response Items :", item)
@@ -95,6 +101,10 @@ func QMHTTPPost(qmRequest models.QMRequest, record models.Record) {
 	if oldQuantity > quantity {
 		initSales = oldQuantity - quantity
 	}
+
+	// if quantity >= oldQuantity {
+
+	// }
 
 	newRecord := new(models.Record)
 

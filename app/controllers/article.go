@@ -13,15 +13,17 @@ import (
 // AllArticles is get all articles
 func AllArticles(c echo.Context) error {
 	var (
-		data models.ArticlePage
-		page models.PageModel
-		err  error
+		data        models.ArticlePage
+		queryparams models.QueryParams
+		err         error
 	)
 
 	qps := c.QueryParams()
 
 	limitq := c.QueryParam("limit")
 	offsetq := c.QueryParam("offset")
+	startTimeq := c.QueryParam("start_time")
+	endTime := c.QueryParam("end_time")
 
 	limit, _ := strconv.Atoi(limitq)
 	offset, _ := strconv.Atoi(offsetq)
@@ -33,10 +35,12 @@ func AllArticles(c echo.Context) error {
 		limit = 10
 	}
 
-	page.Limit = limit
-	page.Offset = offset
+	queryparams.Limit = limit
+	queryparams.Offset = offset
+	queryparams.StartTime = startTimeq
+	queryparams.EndTime = endTime
 
-	data, err = models.GetArticles(page)
+	data, err = models.GetArticles(queryparams)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, err)
 	}
@@ -70,15 +74,15 @@ func ShowArticle(c echo.Context) error {
 	return c.JSON(http.StatusOK, article)
 }
 
-//create article
+// CreateArticle is create article
 func CreateArticle(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	userId := int(claims["id"].(float64))
+	userID := int(claims["id"].(float64))
 
 	article := new(models.Article)
 
-	article.UserID = userId
+	article.UserID = userID
 	article.Title = c.FormValue("title")
 	article.Content = c.FormValue("content")
 
@@ -91,7 +95,7 @@ func CreateArticle(c echo.Context) error {
 	return c.JSON(http.StatusCreated, article)
 }
 
-//update article
+// UpdateArticle update article
 func UpdateArticle(c echo.Context) error {
 	// Parse the content
 	article := new(models.Article)
@@ -115,7 +119,7 @@ func UpdateArticle(c echo.Context) error {
 	return c.JSON(http.StatusOK, m)
 }
 
-//delete article
+// DeleteArticle delete article
 func DeleteArticle(c echo.Context) error {
 	var err error
 

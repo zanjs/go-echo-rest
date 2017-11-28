@@ -65,17 +65,105 @@ func AllProductWareroom(c echo.Context) error {
 	return c.JSON(http.StatusOK, data)
 }
 
-// AllRecords  get all records
-func AllRecords(c echo.Context) error {
+// AllProductWareroomRecords get all products and wareroom
+func AllProductWareroomRecords(c echo.Context) error {
 	var (
-		records []models.Record
-		err     error
+		data     models.ProductWareroomExcel
+		products []models.Product
+		err      error
 	)
-	records, err = models.GetRecords()
+	products, err = models.GetProducts()
 	if err != nil {
 		return c.JSON(http.StatusForbidden, err)
 	}
-	return c.JSON(http.StatusOK, records)
+
+	data.Warerooms, err = models.GetWarerooms()
+	if err != nil {
+		return c.JSON(http.StatusForbidden, err)
+	}
+
+	go func() {
+
+		for index := 2; index < len(products); index++ {
+			var product models.Product
+			product = products[index]
+
+			pID := product.ID
+
+			var pExcle models.ProductExcel
+			pExcle.ProductTitle = product.Title
+
+			// data.Products = append
+
+			fmt.Println("Index:   Value: ", pID, index, product)
+		}
+
+		// for key, v := range products {
+		// 	var product models.Product
+		// 	product = v
+		// 	pID := product.ID
+		// 	// fmt.Println(pID)
+		// 	fmt.Println("key", key)
+
+		// 	data.Products[key] = models.ProductExcel{}
+
+		// 	for _, v2 := range data.Warerooms {
+		// 		fmt.Println(v2)
+		// 		wID := v2.ID
+		// 		var record models.Record
+
+		// 		record, err = models.GetRecordLast(wID, pID)
+
+		// 		if err != nil {
+		// 			fmt.Println("查询最好一个 err: ", err, record)
+		// 		}
+
+		// 		// fmt.Println("record", record)
+		// 	}
+
+		// }
+
+	}()
+
+	return c.JSON(http.StatusOK, data)
+}
+
+// AllRecords  get all records
+func AllRecords(c echo.Context) error {
+	var (
+		data        models.RecordPage
+		queryparams models.QueryParams
+		err         error
+	)
+
+	qps := c.QueryParams()
+
+	limitq := c.QueryParam("limit")
+	offsetq := c.QueryParam("offset")
+	startTimeq := c.QueryParam("start_time")
+	endTime := c.QueryParam("end_time")
+
+	limit, _ := strconv.Atoi(limitq)
+	offset, _ := strconv.Atoi(offsetq)
+	fmt.Println(qps)
+	fmt.Println(limit)
+	fmt.Println(offset)
+
+	if limit == 0 {
+		limit = 10
+	}
+
+	queryparams.Limit = limit
+	queryparams.Offset = offset
+	queryparams.StartTime = startTimeq
+	queryparams.EndTime = endTime
+
+	data, err = models.GetRecords(queryparams)
+
+	if err != nil {
+		return c.JSON(http.StatusForbidden, err)
+	}
+	return c.JSON(http.StatusOK, data)
 }
 
 // ShowRecord get one record

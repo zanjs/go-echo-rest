@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// BaseModel is
 type BaseModel struct {
 	ID        int        `json:"id" sql:"AUTO_INCREMENT" gorm:"primary_key,column:id"`
 	CreatedAt time.Time  `json:"created_at" gorm:"column:created_at" sql:"DEFAULT:current_timestamp"`
@@ -11,8 +12,17 @@ type BaseModel struct {
 	DeletedAt *time.Time `json:"deleted_at" gorm:"column:deleted_at"`
 }
 
+// PageModel is
 type PageModel struct {
 	Offset int `json:"offset"`
 	Limit  int `json:"limit"`
 	Count  int `json:"count"`
+}
+
+// QueryParams is
+type QueryParams struct {
+	Offset    int    `json:"offset"`
+	Limit     int    `json:"limit"`
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
 }
