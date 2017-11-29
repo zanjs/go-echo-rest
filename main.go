@@ -31,25 +31,36 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 
-	var a = map[string]disk{
-		"xvda": disk{"5656418", "22438120"},
-		"xvdb": disk{"8493386", "1149266272"},
-	}
-	var b = map[string]disk{
-	// "xvda": disk{"11", "22"},
-	// "xvdb": disk{"33", "44"},
-	}
-
-	// for key, val := range a {
-	// 	b[key] = disk{val.read, val.write}
-	// 	// b[key].read = val.read
-	// 	// b[key].write = val.write
+	// var b = map[string]disk{
+	// 	"xvda": disk{"5656418", "22438120"},
+	// 	"xvdb": disk{"8493386", "1149266272"},
 	// }
+	// // var b = map[string]disk{
+	// // // "xvda": disk{"11", "22"},
+	// // // "xvdb": disk{"33", "44"},
+	// // }
 
-	for key, val := range a {
-		b[key] = val
-	}
-	fmt.Println(b)
+	// // for key, val := range a {
+	// // 	b[key] = disk{val.read, val.write}
+	// // 	// b[key].read = val.read
+	// // 	// b[key].write = val.write
+	// // }
+	// // s := make(map[string]disk)
+
+	// a := []disk{}
+	// // l := len(a)
+	// s := a[0:]
+	// var dd disk
+	// dd.read = "22"
+	// dd.write = "33"
+	// s = append(s, dd)
+
+	// for _, val := range b {
+	// 	// b[key] = val
+
+	// 	s = append(s, val)
+	// }
+	// fmt.Println(s)
 
 	// Routes
 	e.GET("/", controllers.GetHome)

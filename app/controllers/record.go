@@ -82,48 +82,77 @@ func AllProductWareroomRecords(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, err)
 	}
 
-	go func() {
+	productExcelInt := []models.ProductExcel{}
 
-		for index := 2; index < len(products); index++ {
-			var product models.Product
-			product = products[index]
+	productExcel := productExcelInt[0:]
 
-			pID := product.ID
+	for index := 2; index < len(products); index++ {
+		var product models.Product
+		product = products[index]
 
-			var pExcle models.ProductExcel
-			pExcle.ProductTitle = product.Title
+		pID := product.ID
 
-			// data.Products = append
+		productExcelQuantitysInt := []models.ProductExcelQuantity{}
 
-			fmt.Println("Index:   Value: ", pID, index, product)
+		productExcelQuantitys := productExcelQuantitysInt[0:]
+
+		for _, v2 := range data.Warerooms {
+			fmt.Println(v2)
+			wID := v2.ID
+			var record models.Record
+
+			record, err = models.GetRecordLast(wID, pID)
+
+			if err != nil {
+				fmt.Println("查询最好一个 err: ", err, record)
+			}
+
+			var productExcelQuantity models.ProductExcelQuantity
+
+			productExcelQuantity.Quantity = record.Quantity
+			productExcelQuantity.Sales = record.Sales
+
+			productExcelQuantitys = append(productExcelQuantitys, productExcelQuantity)
+			// fmt.Println("record", record)
 		}
 
-		// for key, v := range products {
-		// 	var product models.Product
-		// 	product = v
-		// 	pID := product.ID
-		// 	// fmt.Println(pID)
-		// 	fmt.Println("key", key)
+		var pExcle models.ProductExcel
+		pExcle.ProductTitle = product.Title
+		pExcle.ProductExcelQuantitys = productExcelQuantitys
+		productExcel = append(productExcel, pExcle)
 
-		// 	data.Products[key] = models.ProductExcel{}
+		// data.Products = append
 
-		// 	for _, v2 := range data.Warerooms {
-		// 		fmt.Println(v2)
-		// 		wID := v2.ID
-		// 		var record models.Record
+		// fmt.Println("Index:   Value: ", pID, index, product)
+	}
 
-		// 		record, err = models.GetRecordLast(wID, pID)
+	fmt.Println("productExcel:", productExcel)
 
-		// 		if err != nil {
-		// 			fmt.Println("查询最好一个 err: ", err, record)
-		// 		}
+	data.Products = productExcel
+	// for key, v := range products {
+	// 	var product models.Product
+	// 	product = v
+	// 	pID := product.ID
+	// 	// fmt.Println(pID)
+	// 	fmt.Println("key", key)
 
-		// 		// fmt.Println("record", record)
-		// 	}
+	// 	data.Products[key] = models.ProductExcel{}
 
-		// }
+	// 	for _, v2 := range data.Warerooms {
+	// 		fmt.Println(v2)
+	// 		wID := v2.ID
+	// 		var record models.Record
 
-	}()
+	// 		record, err = models.GetRecordLast(wID, pID)
+
+	// 		if err != nil {
+	// 			fmt.Println("查询最好一个 err: ", err, record)
+	// 		}
+
+	// 		// fmt.Println("record", record)
+	// 	}
+
+	// }
 
 	return c.JSON(http.StatusOK, data)
 }
